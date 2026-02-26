@@ -86,7 +86,6 @@ body {
 /* ── Main content & Layout Grid ── */
 .content { flex: 1; overflow: hidden; position: relative; }
 
-/* CRITICAL FIX: Ensure grid is respected when panel is active */
 .panel { display: none !important; height: 100%; }
 .panel.active { display: grid !important; }
 .split-layout { grid-template-columns: 400px 1fr; width: 100%; height: 100%; }
@@ -134,7 +133,6 @@ body {
 }
 .sample-btn:hover { background: var(--border); color: var(--white); }
 
-/* Textarea for Logs */
 .custom-textarea {
   flex: 1; background: var(--bg); border: 1px solid var(--border);
   border-radius: 8px; color: var(--text); font-family: var(--mono);
@@ -144,7 +142,6 @@ body {
 .custom-textarea:focus { border-color: var(--dim); }
 .custom-textarea::placeholder { color: var(--dim); }
 
-/* Webhook Simulator Buttons */
 .fire-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .fire-btn {
   padding: 16px; background: var(--bg); border: 1px solid var(--border);
@@ -154,12 +151,10 @@ body {
 .btn-name { display: block; font-weight: 600; font-size: 12px; color: var(--white); margin-bottom: 6px; }
 .btn-desc { display: block; font-size: 11px; color: var(--dim); }
 
-/* Webhook URL Copy */
 .webhook-label { font-size: 11px; font-weight: 500; color: var(--dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 .webhook-url { background: var(--bg); border: 1px dashed var(--border); border-radius: 6px; padding: 12px; font-family: var(--mono); font-size: 12px; color: var(--dim); cursor: pointer; transition: all 0.2s; }
 .webhook-url:hover { color: var(--white); border-color: var(--dim); }
 
-/* Alert List */
 .alert-list-wrap { flex: 1; overflow-y: auto; min-height: 0; }
 .alert-item { padding: 16px 24px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .2s; }
 .alert-item:hover { background: var(--surface2); }
@@ -181,7 +176,6 @@ body {
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--dim); text-align: center; }
 .empty-state h3 { font-size: 16px; font-weight: 500; color: var(--white); margin-bottom: 8px; }
 
-/* Chat UI */
 .message { margin-bottom: 32px; animation: fadeIn .4s ease; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
@@ -208,7 +202,6 @@ body {
 #chatInput { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; color: var(--text); outline: none; font-size: 14px; }
 #chatInput:focus { border-color: var(--dim); }
 
-/* New Relic Alert Detail Cards */
 .alert-header-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 32px; }
 .alert-title-text { font-size: 18px; font-weight: 600; color: var(--white); margin-bottom: 20px; }
 .alert-meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
@@ -218,6 +211,21 @@ body {
 
 .ai-card-header { font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 .ai-card-header::before { content: '✨'; }
+
+/* ── Mobile Responsiveness Fix ── */
+@media (max-width: 850px) {
+  html, body { height: auto; overflow: auto; }
+  .content { overflow: visible; display: block; }
+  .panel.active { display: flex !important; flex-direction: column; height: auto; }
+  .split-layout { display: flex; flex-direction: column; }
+  .left-col { height: auto; border-right: none; border-bottom: 4px solid var(--border); }
+  .right-col { height: 85vh; min-height: 500px; }
+  .col-body { height: 300px; flex: none; }
+  .custom-textarea { height: 100%; }
+  .brand-tag { display: none; }
+  .output-area, .nr-detail, .chat-bar { padding: 24px 20px; }
+  .alert-meta-grid { grid-template-columns: 1fr 1fr; }
+}
 </style>
 </head>
 <body>
@@ -406,6 +414,10 @@ async function analyze() {
     const reply = await streamIntoElement(res, aiBody);
     conversationHistory.push({role:'user', content:logs}, {role:'assistant', content: reply});
     document.getElementById('chatBar').className = 'chat-bar visible'; setStatus('ready', 'Ready');
+    // Mobile auto-scroll logic
+    if(window.innerWidth <= 850) {
+      document.querySelector('.right-col').scrollIntoView({ behavior: 'smooth' });
+    }
   } catch(e) { aiBody.textContent = '❌ Error'; setStatus('error', 'Error'); }
   isStreaming = false; document.getElementById('analyzeBtn').disabled = false;
 }
@@ -489,6 +501,10 @@ function selectAlert(alertId) {
       <div id="diagnosis-body">${marked.parse(alert.ai_diagnosis || 'Analyzing...')}</div>
     </div>
   `;
+  // Mobile auto-scroll logic
+  if(window.innerWidth <= 850) {
+    document.querySelector('.right-col').scrollIntoView({ behavior: 'smooth' });
+  }
 }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
